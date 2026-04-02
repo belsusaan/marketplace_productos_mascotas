@@ -24,6 +24,6 @@ class RoleSeeder extends Seeder
 
         $admin->givePermissionTo([$manageCategories, $manageProducts]);
         $seller->givePermissionTo([$manageProducts]);
-        $buyer->givePermissionTo($buyProducts)
+        $buyer->givePermissionTo($buyProducts);
     }
 }
