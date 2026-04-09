@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Product;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class ProductPolicy
+class StorePolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class ProductPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Product $product): bool
+    public function view(User $user, Store $store): bool
     {
         return true;
     }
@@ -29,35 +29,32 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('create product');
+        return $user->hasPermissionTo('create store');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Product $product): bool
+    public function update(User $user, Store $store): bool
     {
-        if ($user->hasPermissionTo('delete any product')) {
+        if ($user->hasRole('admin')) {
             return true;
         }
-        return $user->hasPermissionTo('edit own product') && $user->id === $product->user_id;
+        return $user->hasPermissionTo('edit store') && $user->id === $store->user_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Product $product): bool
+    public function delete(User $user, Store $store): bool
     {
-        if ($user->hasPermissionTo('delete any product')) {
-            return true;
-        }
-        return $user->hasPermissionTo('delete own product') && $user->id === $product->user_id;
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Product $product): bool
+    public function restore(User $user, Store $store): bool
     {
         return false;
     }
@@ -65,7 +62,7 @@ class ProductPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Product $product): bool
+    public function forceDelete(User $user, Store $store): bool
     {
         return false;
     }

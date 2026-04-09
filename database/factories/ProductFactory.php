@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Category;
-use App\Models\Store;
-use App\Models\User;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
+use App\Models\Store;
+use App\Models\Category;
 
 /**
  * @extends Factory<Product>
@@ -24,10 +24,11 @@ class ProductFactory extends Factory
             'user_id'     => User::factory(),
             'store_id'    => Store::factory(),
             'category_id' => Category::factory(),
-            'name'        => $this->faker->word(),
-            'description' => $this->faker->sentence(),
-            'price'       => $this->faker->randomFloat(2, 1, 100),
-            'stock'       => $this->faker->numberBetween(1, 50),
+            'name'        => fake()->words(3, true),
+            'description' => fake()->sentence(),
+            'price'       => fake()->randomFloat(2, 1, 500),
+            'stock'       => fake()->numberBetween(0, 100),
+            'image_url'   => fake()->imageUrl(),
             'is_active'   => true,
         ];
     }

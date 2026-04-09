@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 /**
  * @extends Factory<Store>
@@ -19,11 +19,11 @@ class StoreFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'     => User::factory(),
-            'name'        => $this->faker->company(),
-            'description' => $this->faker->sentence(),
-            'logo_url'    => null,
-            'is_active'   => true,
+            'user_id' => User::factory(),
+            'name' => fake()->company(),
+            'description' => fake()->sentence(),
+            'logo_url' => fake()->imageUrl(),
+            'is_active' => false,
         ];
     }
 }
