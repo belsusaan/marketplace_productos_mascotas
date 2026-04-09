@@ -1,0 +1,64 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Marketplace de Productos para Mascotas API",
+        "description": "API RESTful para el marketplace de productos para mascotas. Permite gestionar usuarios, productos, tiendas, carritos y pedidos mediante autenticación Bearer Token (Sanctum).",
+        "contact": {
+            "name": "Equipo Marketplace Mascotas",
+            "email": "admin@marketplace-mascotas.test"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://marketplace_productos_mascotas.test/api",
+            "description": "API local"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Health check",
+                "description": "Verifica que la API esté operativa.",
+                "operationId": "healthCheck",
+                "responses": {
+                    "200": {
+                        "description": "API operativa",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "description": "Ingresá el token obtenido en /api/login. Formato: Bearer {token}",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "System",
+            "description": "System"
+        }
+    ]
+}
