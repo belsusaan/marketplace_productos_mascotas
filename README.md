@@ -49,9 +49,7 @@ DB_PASSWORD=tu_contraseña
 #### Sanctum
 
 ```bash
-APP_URL=http://localhost:8000
-APP_URL=http://localhost:3000
-SANCTUM_STATEFUL_DOMAINS=localhost:3000
+APP_URL=http://marketplace_productos_mascotas.test
 ```
 
 #### Mail
@@ -63,18 +61,31 @@ MAIL_PORT=2525
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_FROM_ADDRESS="hello@example.com"
-MAIL_FROM_NAME="${Marketplace de productos de mascotas}"
+MAIL_FROM_NAME="Marketplace de productos de mascotas"
 ```
 
 ### Genera la llave de la aplicación
 
+```bash
 php artisan key:generate
+```
 
 ### Correr migraciones y seeders
 
 Correr este comando para construir las tablas y poblarlas con los seeders.
-php artisan migrate --seed
 
-### URL de swagger
+```bash
+php artisan migrate --seed
+```
+
+### Swagger
+
+Correr el comando:
+
+```bash
+php artisan l5-swagger:generate
+```
 
 La documentación de los endpoints Swagger está disponible en el siguiente link:
+
+[http://marketplace_productos_mascotas.test/api/documentation#/](http://marketplace_productos_mascotas.test/api/documentation#/)
