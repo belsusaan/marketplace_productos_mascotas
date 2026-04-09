@@ -53,6 +53,7 @@ class RoleSeeder extends Seeder
         $admin  = Role::firstOrCreate(['name' => 'admin',  'guard_name' => 'api']);
         $seller = Role::firstOrCreate(['name' => 'seller', 'guard_name' => 'api']);
         $buyer  = Role::firstOrCreate(['name' => 'buyer',  'guard_name' => 'api']);
+        $delivery = Role::firstOrCreate(['name' => 'delivery', 'guard_name' => 'api']);
 
         $admin->givePermissionTo([
             'manage categories',

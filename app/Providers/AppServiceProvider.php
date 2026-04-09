@@ -6,12 +6,14 @@ use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Store;
 use App\Policies\DeliveryPolicy;
 use App\Policies\OrderPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\ProductPolicy;
+use App\Policies\CartPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\StorePolicy;
 use Illuminate\Support\Facades\Gate;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Order::class, OrderPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Delivery::class, DeliveryPolicy::class);
+        Gate::policy(Cart::class, CartPolicy::class);
         Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Store::class, StorePolicy::class);
 

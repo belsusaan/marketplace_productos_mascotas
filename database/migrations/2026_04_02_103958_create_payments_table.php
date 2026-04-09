@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('method');
             $table->decimal('amount', 10, 2);
             $table->string('status');
-            $table->string('transaction_ref');
+            $table->string('transaction_ref')->unique();
             $table->timestamp('paid_at');
 
             $table->timestamps();
