@@ -11,7 +11,7 @@
     },
     "servers": [
         {
-            "url": "http://marketplace_productos_mascotas.test/api",
+            "url": "http://localhost:8000/api",
             "description": "API local"
         }
     ],

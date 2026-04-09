@@ -12,9 +12,16 @@ use App\Http\Resources\CategoryResource;
 class CategoryController extends Controller
 {
     use AuthorizesRequests;
+    
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/categories",
+     *     tags={"Categorías"},
+     *     summary="Listar todas las categorías",
+     *     @OA\Response(response=200, description="Lista de categorías")
+     * )
      */
+
     public function index()
     {
         $categories = Category::where('is_active', true)->get();
@@ -22,7 +29,27 @@ class CategoryController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/categories",
+     *     tags={"Categorías"},
+     *     summary="Crear categoría",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Alimentos"),
+     *             @OA\Property(property="description", type="string", example="Comida para mascotas"),
+     *             @OA\Property(property="slug", type="string", example="alimentos"),
+     *             @OA\Property(property="image_url", type="string", example="https://example.com/img.jpg"),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Categoría creada"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=422, description="Error de validación")
+     * )
      */
     public function store(CreateCategoryRequest $request)
     {
@@ -32,7 +59,14 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/categories/{id}",
+     *     tags={"Categorías"},
+     *     summary="Ver detalle de categoría",
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Detalle de categoría"),
+     *     @OA\Response(response=404, description="Categoría no encontrada")
+     * )
      */
     public function show($id)
     {
@@ -52,8 +86,25 @@ class CategoryController extends Controller
         return new CategoryResource($category);
     }
 
-    /**
-     * Update the specified resource in storage.
+   /**
+     * @OA\Put(
+     *     path="/api/categories/{id}",
+     *     tags={"Categorías"},
+     *     summary="Editar categoría",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Alimentos Premium"),
+     *             @OA\Property(property="description", type="string", example="Comida premium"),
+     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Categoría actualizada"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=404, description="Categoría no encontrada")
+     * )
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
@@ -63,7 +114,17 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/categories/{id}",
+     *     tags={"Categorías"},
+     *     summary="Eliminar categoría",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Categoría eliminada"),
+     *     @OA\Response(response=401, description="No autenticado"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=404, description="Categoría no encontrada")
+     * )
      */
     public function destroy(Category $category)
     {
