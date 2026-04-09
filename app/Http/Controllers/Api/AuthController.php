@@ -81,8 +81,7 @@ class AuthController extends Controller
             'address'  => $request->address,
         ]);
 
-        // TODO: Asignar rol 'buyer' por defecto una vez que Persona 4 seedee los roles.
-        // $user->assignRole('buyer');
+        $user->assignRole('buyer');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
