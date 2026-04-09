@@ -11,7 +11,7 @@
     },
     "servers": [
         {
-            "url": "L5_SWAGGER_CONST_HOST",
+            "url": "http://marketplace_productos_mascotas.test/api",
             "description": "API local"
         }
     ],

@@ -8,53 +8,82 @@ use App\Models\Store;
 use App\Http\Resources\StoreResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class StoreController extends Controller
 {
     use AuthorizesRequests;
-    /**
-     * Display a listing of the resource.
-     */
 
-    /**
-     * @OA\Get(
-     *     path="/stores",
-     *     tags={"Tienda"},
-     *     summary="Listar tiendas activas",
-     *     @OA\Response(response=200, description="Lista de tiendas")
-     * )
-     */
+    #[OA\Get(
+        path: '/stores',
+        operationId: 'listStores',
+        summary: 'Listar tiendas activas',
+        tags: ['Tienda'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Lista de tiendas',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(
+                        type: 'object',
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                            new OA\Property(property: 'name', type: 'string', example: 'Mi Tienda de Mascotas'),
+                            new OA\Property(property: 'description', type: 'string', example: 'La mejor tienda'),
+                            new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                            new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                            new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-04-09T12:00:00.000000Z'),
+                        ]
+                    )
+                )
+            )
+        ]
+    )]
     public function index()
     {
-        $stores = Store::where('is_active', true)->get(['id', 'name', 'description']);
+        $stores = Store::where('is_active', true)->get(['id', 'name', 'description', 'logo_url', 'is_active', 'created_at']);
         return StoreResource::collection($stores);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-
-    /**
-     * @OA\Post(
-     *     path="/stores",
-     *     tags={"Tienda"},
-     *     summary="Crear perfil de tienda",
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name"},
-     *             @OA\Property(property="name", type="string", example="Mi Tienda de Mascotas"),
-     *             @OA\Property(property="description", type="string", example="La mejor tienda"),
-     *             @OA\Property(property="logo_url", type="string", example="https://example.com/logo.png")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Tienda creada"),
-     *     @OA\Response(response=401, description="No autenticado"),
-     *     @OA\Response(response=403, description="No autorizado"),
-     *     @OA\Response(response=422, description="Error de validación")
-     * )
-     */
+    #[OA\Post(
+        path: '/stores',
+        operationId: 'createStore',
+        summary: 'Crear perfil de tienda',
+        tags: ['Tienda'],
+        security: [['BearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Mi Tienda de Mascotas'),
+                    new OA\Property(property: 'description', type: 'string', example: 'La mejor tienda'),
+                    new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Tienda creada',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'name', type: 'string', example: 'Mi Tienda de Mascotas'),
+                        new OA\Property(property: 'description', type: 'string', example: 'La mejor tienda'),
+                        new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                        new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-04-09T12:00:00.000000Z'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'No autorizado'),
+            new OA\Response(response: 422, description: 'Error de validación'),
+        ]
+    )]
     public function store(CreateStoreRequest $request)
     {
         $this->authorize('create', Store::class);
@@ -66,64 +95,83 @@ class StoreController extends Controller
         return (new StoreResource($store))->response()->setStatusCode(201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-
-    /**
-     * @OA\Get(
-     *     path="/stores/{id}",
-     *     tags={"Tienda"},
-     *     summary="Ver perfil de tienda",
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Detalle de tienda"),
-     *     @OA\Response(response=404, description="Tienda no encontrada")
-     * )
-     */
+    #[OA\Get(
+        path: '/stores/{id}',
+        operationId: 'showStore',
+        summary: 'Ver perfil de tienda',
+        tags: ['Tienda'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Detalle de tienda',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'name', type: 'string', example: 'Mi Tienda de Mascotas'),
+                        new OA\Property(property: 'description', type: 'string', example: 'La mejor tienda'),
+                        new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                        new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-04-09T12:00:00.000000Z'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 404, description: 'Tienda no encontrada'),
+        ]
+    )]
     public function show($id)
     {
         $store = Store::with('products')->find($id);
 
-    if (!$store) {
-        return response()->json([
-            'message' => 'Tienda no encontrada'
-        ], 404);
+        if (!$store) return response()->json(['message' => 'Tienda no encontrada'], 404);
+        if (!$store->is_active) return response()->json(['message' => 'Tienda no disponible'], 404);
+
+        return new StoreResource($store);
     }
 
-    if (!$store->is_active) {
-        return response()->json([
-            'message' => 'Tienda no disponible'
-        ], 404);
-    }
-
-    return new StoreResource($store);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-
-    /**
-     * @OA\Put(
-     *     path="/stores/{id}",
-     *     tags={"Tienda"},
-     *     summary="Editar perfil de tienda",
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Tienda Actualizada"),
-     *             @OA\Property(property="description", type="string", example="Nueva descripción"),
-     *             @OA\Property(property="logo_url", type="string", example="https://example.com/logo.png"),
-     *             @OA\Property(property="is_active", type="boolean", example=true)
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Tienda actualizada"),
-     *     @OA\Response(response=401, description="No autenticado"),
-     *     @OA\Response(response=403, description="No autorizado"),
-     *     @OA\Response(response=404, description="Tienda no encontrada")
-     * )
-     */
+    #[OA\Put(
+        path: '/stores/{id}',
+        operationId: 'updateStore',
+        summary: 'Editar perfil de tienda',
+        tags: ['Tienda'],
+        security: [['BearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Tienda Actualizada'),
+                    new OA\Property(property: 'description', type: 'string', example: 'Nueva descripción'),
+                    new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                    new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Tienda actualizada',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'name', type: 'string', example: 'Tienda Actualizada'),
+                        new OA\Property(property: 'description', type: 'string', example: 'Nueva descripción'),
+                        new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                        new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-04-09T12:00:00.000000Z'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'No autorizado'),
+            new OA\Response(response: 404, description: 'Tienda no encontrada'),
+        ]
+    )]
     public function update(UpdateStoreRequest $request, Store $store)
     {
         $this->authorize('update', $store);
@@ -131,47 +179,52 @@ class StoreController extends Controller
         $this->checkStoreActivation($store);
         return new StoreResource($store);
     }
-    
-    /**
-     * @OA\Get(
-     *     path="/seller/store",
-     *     tags={"Tienda"},
-     *     summary="Ver mi tienda como vendedor",
-     *     security={{"sanctum":{}}},
-     *     @OA\Response(response=200, description="Mi tienda"),
-     *     @OA\Response(response=401, description="No autenticado"),
-     *     @OA\Response(response=404, description="No tienes tienda creada")
-     * )
-     */
+
+    #[OA\Get(
+        path: '/seller/store',
+        operationId: 'myStore',
+        summary: 'Ver mi tienda como vendedor',
+        tags: ['Tienda'],
+        security: [['BearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Mi tienda',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer', example: 1),
+                        new OA\Property(property: 'name', type: 'string', example: 'Mi Tienda de Mascotas'),
+                        new OA\Property(property: 'description', type: 'string', example: 'La mejor tienda'),
+                        new OA\Property(property: 'logo_url', type: 'string', example: 'https://example.com/logo.png'),
+                        new OA\Property(property: 'is_active', type: 'boolean', example: true),
+                        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-04-09T12:00:00.000000Z'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 404, description: 'No tienes tienda creada'),
+        ]
+    )]
     public function myStore()
     {
         $store = auth()->user()->store()->with('products')->firstOrFail();
         return new StoreResource($store);
     }
 
+    public function destroy(Store $store)
+    {
+        $this->authorize('update', $store);
+        $store->update(['is_active' => false]);
+        return response()->json(['message' => 'Tienda desactivada correctamente']);
+    }
+
     private function checkStoreActivation(Store $store)
     {
         $isComplete = $store->name && $store->description;
         $hasProducts = $store->products()->where('is_active', true)->exists();
-
         if ($isComplete && $hasProducts) {
             $store->update(['is_active' => true]);
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Store $store)
-    {
-        $this->authorize('update', $store);
-
-    $store->update([
-        'is_active' => false
-    ]);
-
-    return response()->json([
-        'message' => 'Tienda desactivada correctamente'
-    ]);
     }
 }

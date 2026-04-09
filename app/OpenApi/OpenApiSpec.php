@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
     )
 )]
 #[OA\Server(
-    url: 'L5_SWAGGER_CONST_HOST',
+    url: L5_SWAGGER_CONST_HOST,
     description: 'API local'
 )]
 #[OA\SecurityScheme(
