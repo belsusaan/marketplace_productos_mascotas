@@ -73,9 +73,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Categorías — Admin
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::put('/categories/{category}', [CategoryController::class, 'update']);
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+    Route::middleware('role:admin')->group(function () {
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::put('/categories/{category}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+    });
 
     // Tienda — Vendedor
     Route::post('/stores', [StoreController::class, 'store']);

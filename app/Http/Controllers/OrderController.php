@@ -151,7 +151,7 @@ class OrderController extends Controller
         $cart->cartItems()->delete();
         $order->load('orderItems.product', 'payment', 'delivery');
 
-        return new OrderResource($order);
+        return (new OrderResource($order))->response()->setStatusCode(201);
     }
 
     #[OA\Get(

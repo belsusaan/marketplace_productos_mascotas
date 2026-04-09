@@ -119,7 +119,7 @@ class DeliveryController extends Controller
         $order->update(['status' => Order::STATUS_SHIPPED]);
         $delivery->load('user', 'order');
 
-        return new DeliveryResource($delivery);
+        return (new DeliveryResource($delivery))->response()->setStatusCode(201);
     }
 
     #[OA\Patch(
@@ -226,21 +226,24 @@ class DeliveryController extends Controller
     )]
     public function reject(Request $request, $id): DeliveryResource
     {
+        $request->validate([
+            'user_id' => 'sometimes|exists:users,id',
+        ]);
+
         $delivery = Delivery::with('order')->findOrFail($id);
         $this->authorize('update', $delivery);
 
         $delivery->update(['status' => Delivery::STATUS_REJECTED]);
 
         if ($request->has('user_id')) {
-            $newDelivery = Delivery::create([
-                'order_id'    => $delivery->order_id,
+            $delivery->update([
                 'user_id'     => $request->user_id,
                 'status'      => Delivery::STATUS_PENDING,
                 'assigned_at' => now(),
             ]);
 
-            $newDelivery->load('user', 'order');
-            return new DeliveryResource($newDelivery);
+            $delivery->load('user', 'order');
+            return new DeliveryResource($delivery);
         }
 
         $delivery->load('user', 'order');

@@ -99,7 +99,7 @@ class PaymentController extends Controller
 
         $order->update(['status' => Order::STATUS_CONFIRMED]);
 
-        return new PaymentResource($payment);
+        return (new PaymentResource($payment))->response()->setStatusCode(201);
     }
 
     #[OA\Get(

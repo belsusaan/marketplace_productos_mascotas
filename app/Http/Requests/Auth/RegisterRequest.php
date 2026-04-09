@@ -20,6 +20,7 @@ class RegisterRequest extends FormRequest
             'password_confirmation' => ['required', 'string'],
             'phone'                 => ['nullable', 'string', 'max:20'],
             'address'               => ['nullable', 'string', 'max:255'],
+            'role'                  => ['nullable', 'string', 'in:buyer,seller'],
         ];
     }
 

@@ -81,7 +81,7 @@ class AuthController extends Controller
             'address'  => $request->address,
         ]);
 
-        $user->assignRole('buyer');
+        $user->assignRole($request->role ?? 'buyer');
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
