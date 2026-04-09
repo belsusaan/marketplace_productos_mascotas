@@ -226,28 +226,26 @@ class DeliveryController extends Controller
     )]
     public function reject(Request $request, $id): DeliveryResource
     {
-        $request->validate([
-            'user_id' => 'sometimes|exists:users,id',
-        ]);
-
         $delivery = Delivery::with('order')->findOrFail($id);
         $this->authorize('update', $delivery);
-
+    
         $delivery->update(['status' => Delivery::STATUS_REJECTED]);
 
         if ($request->has('user_id')) {
-            $delivery->update([
-                'user_id'     => $request->user_id,
-                'status'      => Delivery::STATUS_PENDING,
-                'assigned_at' => now(),
-            ]);
-
-            $delivery->load('user', 'order');
-            return new DeliveryResource($delivery);
-        }
+            
+        $delivery->update([
+            'user_id'     => $request->user_id,
+            'status'      => Delivery::STATUS_PENDING,
+            'assigned_at' => now(),
+            'accepted_at' => null,
+        ]);
 
         $delivery->load('user', 'order');
         return new DeliveryResource($delivery);
+    }
+
+    $delivery->load('user', 'order');
+    return new DeliveryResource($delivery);
     }
 
     #[OA\Get(
