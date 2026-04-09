@@ -7,20 +7,41 @@ use App\Http\Resources\DeliveryResource;
 use App\Models\Delivery;
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
 
 class DeliveryController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/deliveries/available",
-     *     tags={"Entregas"},
-     *     summary="Ver repartidores disponibles",
-     *     security={{"sanctum":{}}},
-     *     @OA\Response(response=200, description="Lista de repartidores")
-     * )
-     */
-    public function available()
+    #[OA\Get(
+        path: '/deliveries/available',
+        operationId: 'getAvailableDeliverers',
+        summary: 'Ver repartidores disponibles',
+        description: 'Devuelve la lista de usuarios con rol "delivery" disponibles para asignación.',
+        tags: ['Entregas'],
+        security: [['BearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Lista de repartidores',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 3),
+                                new OA\Property(property: 'name', type: 'string', example: 'Carlos Repartidor'),
+                                new OA\Property(property: 'email', type: 'string', example: 'carlos@example.com'),
+                            ]
+                        )),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'Sin permisos'),
+            new OA\Response(response: 500, description: 'Error interno del servidor'),
+        ]
+    )]
+    public function available(): JsonResponse
     {
         $this->authorize('viewAny', Delivery::class);
 
@@ -29,25 +50,56 @@ class DeliveryController extends Controller
         return response()->json(['data' => $deliverers]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/deliveries",
-     *     tags={"Entregas"},
-     *     summary="Crear asignacion de entrega a repartidor",
-     *     security={{"sanctum":{}}},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"order_id","user_id"},
-     *             @OA\Property(property="order_id", type="integer", example=1),
-     *             @OA\Property(property="user_id", type="integer", example=3)
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Entrega asignada"),
-     *     @OA\Response(response=422, description="Pedido ya tiene entrega asignada")
-     * )
-     */
-    public function store(StoreDeliveryRequest $request)
+    #[OA\Post(
+        path: '/deliveries',
+        operationId: 'storeDelivery',
+        summary: 'Asignar entrega a un repartidor',
+        description: 'Crea una asignación de entrega para un pedido. Cambia el estado del pedido a "shipped". Solo un pedido puede tener una entrega activa.',
+        tags: ['Entregas'],
+        security: [['BearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['order_id', 'user_id'],
+                properties: [
+                    new OA\Property(property: 'order_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'user_id', type: 'integer', example: 3),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Entrega asignada exitosamente',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'object', properties: [
+                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                            new OA\Property(property: 'order_id', type: 'integer', example: 1),
+                            new OA\Property(property: 'user_id', type: 'integer', example: 3),
+                            new OA\Property(property: 'status', type: 'string', example: 'pending'),
+                            new OA\Property(property: 'assigned_at', type: 'string', format: 'date-time', example: '2026-04-08T12:00:00.000000Z'),
+                            new OA\Property(property: 'user', type: 'object', nullable: true),
+                            new OA\Property(property: 'order', type: 'object', nullable: true),
+                        ]),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'El pedido ya tiene una entrega asignada',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'message', type: 'string', example: 'Este pedido ya tiene una entrega asignada.'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'Sin permisos'),
+            new OA\Response(response: 500, description: 'Error interno del servidor'),
+        ]
+    )]
+    public function store(StoreDeliveryRequest $request): JsonResponse|DeliveryResource
     {
         $this->authorize('create', Delivery::class);
 
@@ -65,31 +117,52 @@ class DeliveryController extends Controller
         ]);
 
         $order->update(['status' => Order::STATUS_SHIPPED]);
-
         $delivery->load('user', 'order');
 
         return new DeliveryResource($delivery);
     }
 
-    /**
-     * @OA\Patch(
-     *     path="/deliveries/{id}/accept",
-     *     tags={"Entregas"},
-     *     summary="Repartidor acepta la entrega",
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(response=200, description="Entrega aceptada")
-     * )
-     */
-    public function accept($id)
+    #[OA\Patch(
+        path: '/deliveries/{id}/accept',
+        operationId: 'acceptDelivery',
+        summary: 'Repartidor acepta la entrega',
+        description: 'El repartidor asignado acepta la entrega. Cambia el estado a "accepted" y registra el timestamp.',
+        tags: ['Entregas'],
+        security: [['BearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID de la entrega',
+                schema: new OA\Schema(type: 'integer', example: 1)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Entrega aceptada exitosamente',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'object', properties: [
+                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                            new OA\Property(property: 'status', type: 'string', example: 'accepted'),
+                            new OA\Property(property: 'accepted_at', type: 'string', format: 'date-time', example: '2026-04-08T13:00:00.000000Z'),
+                        ]),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'Sin permisos para aceptar esta entrega'),
+            new OA\Response(response: 404, description: 'Entrega no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno del servidor'),
+        ]
+    )]
+    public function accept($id): DeliveryResource
     {
         $delivery = Delivery::with('order')->findOrFail($id);
         $this->authorize('update', $delivery);
+
         $delivery->update([
             'status'      => Delivery::STATUS_ACCEPTED,
             'accepted_at' => now(),
@@ -101,30 +174,61 @@ class DeliveryController extends Controller
         return new DeliveryResource($delivery);
     }
 
-    /**
-     * @OA\Patch(
-     *     path="/deliveries/{id}/reject",
-     *     tags={"Entregas"},
-     *     summary="Repartidor rechaza y reasigna entrega",
-     *     security={{"sanctum":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             @OA\Property(property="user_id", type="integer", example=4)
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Entrega rechazada o reasignada")
-     * )
-     */
-    public function reject(Request $request, $id)
+    #[OA\Patch(
+        path: '/deliveries/{id}/reject',
+        operationId: 'rejectDelivery',
+        summary: 'Repartidor rechaza la entrega',
+        description: 'El repartidor rechaza la entrega. Opcionalmente se puede reasignar a otro repartidor enviando un nuevo user_id.',
+        tags: ['Entregas'],
+        security: [['BearerAuth' => []]],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID de la entrega',
+                schema: new OA\Schema(type: 'integer', example: 1)
+            ),
+        ],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: 'user_id',
+                        type: 'integer',
+                        nullable: true,
+                        description: 'ID del nuevo repartidor. Si se omite, solo se rechaza sin reasignar.',
+                        example: 4
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Entrega rechazada o reasignada exitosamente',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'object', properties: [
+                            new OA\Property(property: 'id', type: 'integer', example: 2),
+                            new OA\Property(property: 'status', type: 'string', example: 'pending'),
+                            new OA\Property(property: 'user_id', type: 'integer', example: 4),
+                        ]),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'Sin permisos para rechazar esta entrega'),
+            new OA\Response(response: 404, description: 'Entrega no encontrada'),
+            new OA\Response(response: 500, description: 'Error interno del servidor'),
+        ]
+    )]
+    public function reject(Request $request, $id): DeliveryResource
     {
         $delivery = Delivery::with('order')->findOrFail($id);
         $this->authorize('update', $delivery);
+
         $delivery->update(['status' => Delivery::STATUS_REJECTED]);
 
         if ($request->has('user_id')) {
@@ -143,16 +247,40 @@ class DeliveryController extends Controller
         return new DeliveryResource($delivery);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/admin/deliveries",
-     *     tags={"Entregas"},
-     *     summary="Ver todas las entregas",
-     *     security={{"sanctum":{}}},
-     *     @OA\Response(response=200, description="Lista de todas las entregas")
-     * )
-     */
-    public function adminDeliveries()
+    #[OA\Get(
+        path: '/admin/deliveries',
+        operationId: 'getAdminDeliveries',
+        summary: 'Ver todas las entregas (admin)',
+        description: 'Solo accesible por administradores. Devuelve todas las entregas del sistema con usuario y orden asociados.',
+        tags: ['Entregas'],
+        security: [['BearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Lista de todas las entregas',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'order_id', type: 'integer', example: 1),
+                                new OA\Property(property: 'user_id', type: 'integer', example: 3),
+                                new OA\Property(property: 'status', type: 'string', example: 'accepted'),
+                                new OA\Property(property: 'assigned_at', type: 'string', format: 'date-time', example: '2026-04-08T12:00:00.000000Z'),
+                                new OA\Property(property: 'accepted_at', type: 'string', format: 'date-time', nullable: true, example: '2026-04-08T13:00:00.000000Z'),
+                                new OA\Property(property: 'user', type: 'object'),
+                                new OA\Property(property: 'order', type: 'object'),
+                            ]
+                        )),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'No autenticado'),
+            new OA\Response(response: 403, description: 'Sin permisos de administrador'),
+            new OA\Response(response: 500, description: 'Error interno del servidor'),
+        ]
+    )]
+    public function adminDeliveries(): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $this->authorize('viewAny', Delivery::class);
 
