@@ -1,0 +1,675 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Marketplace de Productos para Mascotas API",
+        "description": "API REST para marketplace de mascotas",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/cart": {
+            "get": {
+                "tags": [
+                    "Carrito"
+                ],
+                "summary": "Ver carrito actual",
+                "operationId": "294e093bf29c111c01d8402121fb4f43",
+                "responses": {
+                    "201": {
+                        "description": "Carrito del usuario"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Carrito"
+                ],
+                "summary": "Agregar item al carrito",
+                "operationId": "17edc07162b12ee962c37746abcf34a5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Item agregado al carrito"
+                    },
+                    "422": {
+                        "description": "Stock insuficiente"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Carrito"
+                ],
+                "summary": "Vaciar carrito completo",
+                "operationId": "f377929d0e996a1c3f953864f92433ce",
+                "responses": {
+                    "200": {
+                        "description": "Carrito vaciado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/cart/{item_id}": {
+            "put": {
+                "tags": [
+                    "Carrito"
+                ],
+                "summary": "Actualizar cantidad de item",
+                "operationId": "fe846ac7d3296a40f9bbe4d9db3d05f9",
+                "parameters": [
+                    {
+                        "name": "item_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cantidad actualizada"
+                    },
+                    "422": {
+                        "description": "Stock insuficiente"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Carrito"
+                ],
+                "summary": "Eliminar item del carrito",
+                "operationId": "b834e725a75f82252fd695743528c4a7",
+                "parameters": [
+                    {
+                        "name": "item_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Item eliminado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/deliveries/available": {
+            "get": {
+                "tags": [
+                    "Entregas"
+                ],
+                "summary": "Ver repartidores disponibles",
+                "operationId": "ca1fd5ded77f2521854feb0c7e65ad5f",
+                "responses": {
+                    "200": {
+                        "description": "Lista de repartidores"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/deliveries": {
+            "post": {
+                "tags": [
+                    "Entregas"
+                ],
+                "summary": "Crear asignacion de entrega a repartidor",
+                "operationId": "b585494cbe4a71f83177c0d8cb2925aa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Entrega asignada"
+                    },
+                    "422": {
+                        "description": "Pedido ya tiene entrega asignada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/deliveries/{id}/accept": {
+            "patch": {
+                "tags": [
+                    "Entregas"
+                ],
+                "summary": "Repartidor acepta la entrega",
+                "operationId": "39f24a55f6732c58c97aef16c9ba1597",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entrega aceptada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/deliveries/{id}/reject": {
+            "patch": {
+                "tags": [
+                    "Entregas"
+                ],
+                "summary": "Repartidor rechaza y reasigna entrega",
+                "operationId": "8fb1fdc227a78c6270ce1567954724e3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Entrega rechazada o reasignada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/deliveries": {
+            "get": {
+                "tags": [
+                    "Entregas"
+                ],
+                "summary": "Ver todas las entregas",
+                "operationId": "2032b4ce682213ddd88765e83c4d6530",
+                "responses": {
+                    "200": {
+                        "description": "Lista de todas las entregas"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Ver mis pedidos",
+                "operationId": "325fd3d55bbe9bb39645269928fa4983",
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos del comprador"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Crear pedido desde el carrito",
+                "operationId": "445bab4f7dc9ea6fcd54f286c0209478",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "shipping_address"
+                                ],
+                                "properties": {
+                                    "shipping_address": {
+                                        "type": "string",
+                                        "example": "Calle Falsa 123"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Sin notas"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pedido creado"
+                    },
+                    "422": {
+                        "description": "Carrito vacío o stock insuficiente"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Ver detalle de pedido",
+                "operationId": "f088d34a2737782215f435f854e31de5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalle del pedido"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/orders/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Actualizar estado del pedido",
+                "operationId": "579bcf347ab0f4a9c09499b54d03176f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "confirmed",
+                                            "shipped",
+                                            "delivered",
+                                            "cancelled"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado actualizado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/seller/orders": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Ver pedidos recibidos como vendedor",
+                "operationId": "236f5f4eab75e35ebb9c4666ce821fcf",
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos del vendedor"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/admin/orders": {
+            "get": {
+                "tags": [
+                    "Pedidos"
+                ],
+                "summary": "Ver todos los pedidos",
+                "operationId": "51fb483aecc6608c4ed70fd380341add",
+                "responses": {
+                    "200": {
+                        "description": "Lista de todos los pedidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/payments": {
+            "post": {
+                "tags": [
+                    "Pagos"
+                ],
+                "summary": "Registrar pago de un pedido",
+                "operationId": "3cb7bc2c2ad5498b4ad9521811750cc1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "method",
+                                    "transaction_ref"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cash",
+                                            "card",
+                                            "transfer"
+                                        ]
+                                    },
+                                    "transaction_ref": {
+                                        "type": "string",
+                                        "example": "TXN123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pago registrado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "422": {
+                        "description": "Pedido ya pagado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/payments/{order_id}": {
+            "get": {
+                "tags": [
+                    "Pagos"
+                ],
+                "summary": "Ver estado del pago",
+                "operationId": "14b00cb1b025b20fb822295703f3c384",
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Estado del pago"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Pago no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/payments/{id}/confirm": {
+            "patch": {
+                "tags": [
+                    "Pagos"
+                ],
+                "summary": "Confirmar pago manualmente",
+                "operationId": "48c4b55c69bae31c5947264a7397f4ad",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pago confirmado"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format: Bearer {token}",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Carrito",
+            "description": "Carrito"
+        },
+        {
+            "name": "Entregas",
+            "description": "Entregas"
+        },
+        {
+            "name": "Pedidos",
+            "description": "Pedidos"
+        },
+        {
+            "name": "Pagos",
+            "description": "Pagos"
+        }
+    ]
+}

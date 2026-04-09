@@ -11,6 +11,15 @@ use Illuminate\Http\Request;
 
 class DeliveryController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/deliveries/available",
+     *     tags={"Entregas"},
+     *     summary="Ver repartidores disponibles",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Lista de repartidores")
+     * )
+     */
     public function available()
     {
         $this->authorize('viewAny', Delivery::class);
@@ -19,6 +28,25 @@ class DeliveryController extends Controller
 
         return response()->json(['data' => $deliverers]);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/deliveries",
+     *     tags={"Entregas"},
+     *     summary="Crear asignacion de entrega a repartidor",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"order_id","user_id"},
+     *             @OA\Property(property="order_id", type="integer", example=1),
+     *             @OA\Property(property="user_id", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Entrega asignada"),
+     *     @OA\Response(response=422, description="Pedido ya tiene entrega asignada")
+     * )
+     */
     public function store(StoreDeliveryRequest $request)
     {
         $this->authorize('create', Delivery::class);
@@ -42,6 +70,22 @@ class DeliveryController extends Controller
 
         return new DeliveryResource($delivery);
     }
+
+    /**
+     * @OA\Patch(
+     *     path="/deliveries/{id}/accept",
+     *     tags={"Entregas"},
+     *     summary="Repartidor acepta la entrega",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Entrega aceptada")
+     * )
+     */
     public function accept($id)
     {
         $delivery = Delivery::with('order')->findOrFail($id);
@@ -56,6 +100,27 @@ class DeliveryController extends Controller
 
         return new DeliveryResource($delivery);
     }
+
+    /**
+     * @OA\Patch(
+     *     path="/deliveries/{id}/reject",
+     *     tags={"Entregas"},
+     *     summary="Repartidor rechaza y reasigna entrega",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user_id", type="integer", example=4)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Entrega rechazada o reasignada")
+     * )
+     */
     public function reject(Request $request, $id)
     {
         $delivery = Delivery::with('order')->findOrFail($id);
@@ -77,6 +142,16 @@ class DeliveryController extends Controller
         $delivery->load('user', 'order');
         return new DeliveryResource($delivery);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/admin/deliveries",
+     *     tags={"Entregas"},
+     *     summary="Ver todas las entregas",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Lista de todas las entregas")
+     * )
+     */
     public function adminDeliveries()
     {
         $this->authorize('viewAny', Delivery::class);

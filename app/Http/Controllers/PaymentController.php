@@ -19,9 +19,25 @@ class PaymentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/payments",
+     *     tags={"Pagos"},
+     *     summary="Registrar pago de un pedido",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"order_id","method","transaction_ref"},
+     *             @OA\Property(property="order_id", type="integer", example=1),
+     *             @OA\Property(property="method", type="string", enum={"cash","card","transfer"}),
+     *             @OA\Property(property="transaction_ref", type="string", example="TXN123456")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Pago registrado"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=422, description="Pedido ya pagado")
+     * )
      */
-
     public function store(StorePaymentRequest $request)
     {
         $order = Order::findOrFail($request->order_id);
@@ -55,7 +71,21 @@ class PaymentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/payments/{order_id}",
+     *     tags={"Pagos"},
+     *     summary="Ver estado del pago",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="order_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Estado del pago"),
+     *     @OA\Response(response=403, description="No autorizado"),
+     *     @OA\Response(response=404, description="Pago no encontrado")
+     * )
      */
     public function show(Request $request, $order_id)
     {
@@ -92,6 +122,22 @@ class PaymentController extends Controller
         //
     }
 
+    /**
+     * @OA\Patch(
+     *     path="/payments/{id}/confirm",
+     *     tags={"Pagos"},
+     *     summary="Confirmar pago manualmente",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Pago confirmado"),
+     *     @OA\Response(response=403, description="No autorizado")
+     * )
+     */
     public function confirm($id)
     {
         $payment = Payment::findOrFail($id);

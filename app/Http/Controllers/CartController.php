@@ -11,7 +11,13 @@ use Illuminate\Http\Request;
 class CartController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/cart",
+     *     tags={"Carrito"},
+     *     summary="Ver carrito actual",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=201, description="Carrito del usuario")
+     * )
      */
     public function index(Request $request)
     {
@@ -22,9 +28,24 @@ class CartController extends Controller
 
         return new CartResource($cart);
     }
-
+    
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/cart",
+     *     tags={"Carrito"},
+     *     summary="Agregar item al carrito",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"product_id","quantity"},
+     *             @OA\Property(property="product_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Item agregado al carrito"),
+     *     @OA\Response(response=422, description="Stock insuficiente")
+     * )
      */
     public function store(Request $request)
     {
@@ -76,7 +97,27 @@ class CartController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/cart/{item_id}",
+     *     tags={"Carrito"},
+     *     summary="Actualizar cantidad de item",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="item_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"quantity"},
+     *             @OA\Property(property="quantity", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Cantidad actualizada"),
+     *     @OA\Response(response=422, description="Stock insuficiente")
+     * )
      */
     public function update(UpdateCartItemRequest $request, $item_id)
     {
@@ -97,7 +138,19 @@ class CartController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/cart/{item_id}",
+     *     tags={"Carrito"},
+     *     summary="Eliminar item del carrito",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="item_id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Item eliminado")
+     * )
      */
     public function destroy(Request $request, $item_id)
     {
@@ -112,11 +165,20 @@ class CartController extends Controller
         return new CartResource($cart);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/cart",
+     *     tags={"Carrito"},
+     *     summary="Vaciar carrito completo",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(response=200, description="Carrito vaciado")
+     * )
+     */
     public function clear(Request $request)
     {
         $cart = Cart::firstOrCreate(['user_id' => $request->user()->id]);
         $this->authorize('delete', $cart);
-        
+
         $cart->cartItems()->delete();
 
         $cart->load('cartItems.product');
